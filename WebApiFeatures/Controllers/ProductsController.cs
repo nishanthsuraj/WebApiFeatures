@@ -58,6 +58,14 @@ namespace WebApiFeatures.Controllers
         }
         #endregion
 
+        /* 
+        {
+            "sku": "WTF",
+            "name": "Suraj Industries",
+            "price": 100,
+            "categoryId": 1
+        }
+         */
         #region HttpPost
         [HttpPost]
         public ActionResult PostProduct(Product product)
@@ -81,6 +89,49 @@ namespace WebApiFeatures.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetProductAsync", new { id = product.Id }, product);
+        }
+        #endregion
+
+
+        /* 
+        {
+            "id": 34
+            "sku": "WTF",
+            "name": "Suraj Enterprises",
+            "price": 100,
+            "categoryId": 1
+        }
+         */
+        #region HttpPut
+        [HttpPut("{id}")]
+        public ActionResult PutProduct(int id, Product product)
+        {
+            _context.Entry(product).State = EntityState.Modified;
+            _context.SaveChanges();
+
+            return NoContent();
+        }
+
+        [HttpPut("{id}/async")]
+        public async Task<ActionResult> PutProductAsync(int id, Product product)
+        {
+            if (id != product.Id)
+                return BadRequest();
+
+            _context.Entry(product).State = EntityState.Modified;
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Products.Any(p => p.Id == id))
+                    return NotFound();
+                else
+                    throw;
+            }
+
+            return NoContent();
         }
         #endregion
     }
