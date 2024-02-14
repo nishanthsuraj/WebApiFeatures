@@ -74,6 +74,9 @@ namespace WebApiFeatures.Controllers
         [HttpPost("async")]
         public async Task<ActionResult> PostProductAsync(Product product)
         {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
 
