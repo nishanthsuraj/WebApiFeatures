@@ -62,6 +62,9 @@ namespace WebApiFeatures.Controllers
         [HttpPost]
         public ActionResult PostProduct(Product product)
         {
+            if (!ModelState.IsValid)
+                return BadRequest();
+
             _context.Products.Add(product);
             _context.SaveChanges();
 
