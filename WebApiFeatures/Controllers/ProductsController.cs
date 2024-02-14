@@ -134,5 +134,35 @@ namespace WebApiFeatures.Controllers
             return NoContent();
         }
         #endregion
+
+        #region HttpDelete
+        [HttpDelete("{id}")]
+        public ActionResult<Product> DeleteProduct(int id)
+        {
+            Product? product = _context.Products.Find(id);
+
+            if (product == null)
+                return NotFound();
+
+            _context.Products.Remove(product);
+            _context.SaveChanges();
+
+            return product;
+        }
+
+        [HttpDelete("{id}/async")]
+        public async Task<ActionResult<Product>> DeleteProductAsync(int id)
+        {
+            var product = await _context.Products.FindAsync(id);
+
+            if (product == null)
+                return NotFound();
+
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+
+            return product;
+        }
+        #endregion
     }
 }
