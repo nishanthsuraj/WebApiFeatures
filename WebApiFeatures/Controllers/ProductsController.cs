@@ -153,7 +153,7 @@ namespace WebApiFeatures.Controllers
         [HttpDelete("{id}/async")]
         public async Task<ActionResult<Product>> DeleteProductAsync(int id)
         {
-            var product = await _context.Products.FindAsync(id);
+            Product? product = await _context.Products.FindAsync(id);
 
             if (product == null)
                 return NotFound();
@@ -162,6 +162,52 @@ namespace WebApiFeatures.Controllers
             await _context.SaveChangesAsync();
 
             return product;
+        }
+        #endregion
+
+        // https://localhost:7056/api/Products/Delete?ids=1&ids=2&ids=3
+        // https://localhost:7056/api/Products/DeleteAsync?ids=1&ids=2&ids=3
+        #region Delete using HttpPost
+        [HttpPost]
+        [Route("Delete")]
+        public ActionResult DeleteProducts([FromQuery] int[] ids)
+        {
+            IList<Product> products = new List<Product>();
+            foreach (int id in ids)
+            {
+                Product? product = _context.Products.Find(id);
+
+                if (product == null)
+                    return NotFound();
+
+                products.Add(product);
+            }
+
+            _context.Products.RemoveRange(products);
+            _context.SaveChanges();
+
+            return Ok(products);
+        }
+
+        [HttpPost]
+        [Route("Delete/async")]
+        public async Task<ActionResult> DeleteProductsAsync([FromQuery] int[] ids)
+        {
+            IList<Product> products = new List<Product>();
+            foreach (int id in ids)
+            {
+                Product? product = await _context.Products.FindAsync(id);
+
+                if (product == null)
+                    return NotFound();
+
+                products.Add(product);
+            }
+
+            _context.Products.RemoveRange(products);
+            await _context.SaveChangesAsync();
+
+            return Ok(products);
         }
         #endregion
     }
