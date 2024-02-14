@@ -20,9 +20,9 @@ namespace WebApiFeatures.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<Product> GetAllProducts()
+        public ActionResult<IEnumerable<Product>> GetAllProducts()
         {
-            return _shopContext.Products.ToArray();
+            return Ok(_shopContext.Products.ToList());
         }
     }
 }
