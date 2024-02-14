@@ -20,9 +20,21 @@ namespace WebApiFeatures.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<Product>> GetAllProducts()
+        public ActionResult GetAllProducts()
         {
             return Ok(_shopContext.Products.ToList());
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult GetProduct(int id)
+        {
+            Product? isFound = _shopContext.Products.Find(id);
+            if (isFound == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(isFound);
         }
     }
 }
