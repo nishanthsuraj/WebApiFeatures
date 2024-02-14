@@ -12,30 +12,31 @@ namespace WebApiFeatures.Controllers
     [ApiController]
     public class ProductsController : ControllerBase
     {
-        private readonly ShopContext _shopContext;
+        private readonly ShopContext _context;
         public ProductsController(ShopContext shopContext)
         {
-            _shopContext = shopContext;
+            _context = shopContext;
 
-            _shopContext.Database.EnsureCreated(); // Ensures all the In-memory data is created.
+            _context.Database.EnsureCreated(); // Ensures all the In-memory data is created.
         }
 
+        #region HttpGet
         [HttpGet]
         public ActionResult GetAllProducts()
         {
-            return Ok(_shopContext.Products.ToList());
+            return Ok(_context.Products.ToList());
         }
 
         [HttpGet("async")]
         public async Task<ActionResult> GetAllProductsAsync()
         {
-            return Ok(await _shopContext.Products.ToListAsync());
+            return Ok(await _context.Products.ToListAsync());
         }
 
         [HttpGet("{id}")]
         public ActionResult GetProduct(int id)
         {
-            Product? isFound = _shopContext.Products.Find(id);
+            Product? isFound = _context.Products.Find(id);
             if (isFound == null)
             {
                 return NotFound();
@@ -47,7 +48,7 @@ namespace WebApiFeatures.Controllers
         [HttpGet("{id}/async")]
         public async Task<ActionResult> GetProductAsync(int id)
         {
-            Product? isFound = await _shopContext.Products.FindAsync(id);
+            Product? isFound = await _context.Products.FindAsync(id);
             if (isFound == null)
             {
                 return NotFound();
@@ -55,5 +56,26 @@ namespace WebApiFeatures.Controllers
 
             return Ok(isFound);
         }
+        #endregion
+
+        #region HttpPost
+        [HttpPost]
+        public ActionResult PostProduct(Product product)
+        {
+            _context.Products.Add(product);
+            _context.SaveChanges();
+
+            return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+        }
+
+        [HttpPost("async")]
+        public async Task<ActionResult> PostProductAsync(Product product)
+        {
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetProductAsync", new { id = product.Id }, product);
+        }
+        #endregion
     }
 }
