@@ -27,6 +27,19 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ShopContext>(options => options.UseInMemoryDatabase("Shop"));
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        // This is for any Origins, any Method or any Header
+        //builder.AllowAnyOrigin()
+        //.AllowAnyMethod()
+        //.AllowAnyHeader(); 
+
+        builder.WithOrigins("https://localhost:7270") // Allow only the web application we have created.
+        .WithHeaders("X-API-Version"); // Allow this header as Web API may use this in "Implements Header Versioning"
+    });
+});
 
 var app = builder.Build();
 
@@ -40,6 +53,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+app.UseCors();
 
 app.MapControllers();
 

@@ -1,5 +1,6 @@
 ﻿// Ignore Spelling: Api
 
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiFeatures.Db;
@@ -24,6 +25,8 @@ namespace WebApiFeatures.Controllers
 
         #region HttpGet
         [HttpGet]
+        //[EnableCors] // Individually enable it for action or can be done for the Controller
+        //[DisableCors] // Individually disable it for action or can be done for the Controller
         public ActionResult GetAllProducts([FromQuery] ProductQueryParameters queryParameters)
         {
             IQueryable<Product> products = GetSpecificProducts(_context.Products, queryParameters);
