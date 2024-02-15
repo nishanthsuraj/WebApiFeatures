@@ -21,46 +21,18 @@ namespace WebApiFeatures.Controllers
         }
 
         #region HttpGet
-        // Pagination Url : https://localhost:7056/api/Products?size=5&page=1
-        // Filtering Url: https://localhost:7056/api/Products?MinPrice=20&MaxPrice=50
         [HttpGet]
         public ActionResult GetAllProducts([FromQuery] ProductQueryParameters queryParameters)
         {
-            IQueryable<Product> products = _context.Products;
-
-            if (queryParameters.MinPrice != null)
-            {
-                products = products.Where(p => p.Price >= queryParameters.MinPrice.Value);
-            }
-            if (queryParameters.MaxPrice != null)
-            {
-                products = products.Where(p => p.Price <= queryParameters.MaxPrice.Value);
-            }
-
-            products = products.Skip(queryParameters.Size * (queryParameters.Page - 1))
-                .Take(queryParameters.Size);
+            IQueryable<Product> products = GetSpecificProducts(_context.Products, queryParameters);
 
             return Ok(products.ToList());
         }
 
-        // Pagination Url : https://localhost:7056/api/Products/async?size=5&page=1
-        // Filtering Url: https://localhost:7056/api/Products/async/?MinPrice=20&MaxPrice=50
         [HttpGet("async")]
         public async Task<ActionResult> GetAllProductsAsync([FromQuery] ProductQueryParameters queryParameters)
         {
-            IQueryable<Product> products = _context.Products;
-
-            if(queryParameters.MinPrice != null)
-            {
-                products = products.Where(p => p.Price >= queryParameters.MinPrice.Value);
-            }
-            if (queryParameters.MaxPrice != null)
-            {
-                products = products.Where(p => p.Price <= queryParameters.MaxPrice.Value);
-            }
-
-            products = products.Skip(queryParameters.Size * (queryParameters.Page - 1))
-                .Take(queryParameters.Size);
+            IQueryable<Product> products = GetSpecificProducts(_context.Products, queryParameters);
 
             return Ok(await products.ToListAsync());
         }
@@ -240,6 +212,37 @@ namespace WebApiFeatures.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(products);
+        }
+        #endregion
+
+        #region Private Methods
+        // Pagination Url : https://localhost:7056/api/Products?size=5&page=1
+        // Filtering Url: https://localhost:7056/api/Products?MinPrice=20&MaxPrice=50
+        // Searching Url: https://localhost:7056/api/Products?ProductName=shirt
+        private IQueryable<Product> GetSpecificProducts(IQueryable<Product> products, ProductQueryParameters queryParameters)
+        {
+            #region Filtering Criteria
+            if (queryParameters.MinPrice != null)
+            {
+                products = products.Where(p => p.Price >= queryParameters.MinPrice.Value);
+            }
+            if (queryParameters.MaxPrice != null)
+            {
+                products = products.Where(p => p.Price <= queryParameters.MaxPrice.Value);
+            }
+            #endregion
+
+            #region Searching Criteria
+            if (!string.IsNullOrEmpty(queryParameters.ProductName))
+                products = products.Where(p => p.Name.Contains(queryParameters.ProductName, StringComparison.CurrentCultureIgnoreCase));
+            #endregion
+
+            #region Pagination Criteria
+            products = products.Skip(queryParameters.Size * (queryParameters.Page - 1))
+                .Take(queryParameters.Size);
+            #endregion
+
+            return products;
         }
         #endregion
     }
