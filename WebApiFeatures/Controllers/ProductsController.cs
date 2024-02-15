@@ -3,7 +3,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using WebApiFeatures.Db;
+using WebApiFeatures.Extensions;
 using WebApiFeatures.Models;
 
 namespace WebApiFeatures.Controllers
@@ -22,15 +24,19 @@ namespace WebApiFeatures.Controllers
 
         #region HttpGet
         [HttpGet]
-        public ActionResult GetAllProducts()
+        public ActionResult GetAllProducts([FromQuery] ProductQueryParameters queryParameters)
         {
-            return Ok(_context.Products.ToList());
+            IQueryable<Product> products = GetSpecificProducts(_context.Products, queryParameters);
+
+            return Ok(products.ToList());
         }
 
         [HttpGet("async")]
-        public async Task<ActionResult> GetAllProductsAsync()
+        public async Task<ActionResult> GetAllProductsAsync([FromQuery] ProductQueryParameters queryParameters)
         {
-            return Ok(await _context.Products.ToListAsync());
+            IQueryable<Product> products = GetSpecificProducts(_context.Products, queryParameters);
+
+            return Ok(await products.ToListAsync());
         }
 
         [HttpGet("{id}")]
@@ -208,6 +214,50 @@ namespace WebApiFeatures.Controllers
             await _context.SaveChangesAsync();
 
             return Ok(products);
+        }
+        #endregion
+
+        #region Private Methods
+        // Pagination Url : https://localhost:7056/api/Products?size=5&page=1
+        // Filtering Url: https://localhost:7056/api/Products?MinPrice=20&MaxPrice=50
+        // Searching Url: https://localhost:7056/api/Products?ProductName=shirt
+        // Sorting Url: https://localhost:7056/api/Products?SortBy=Price&SortOrder=desc
+        private IQueryable<Product> GetSpecificProducts(IQueryable<Product> products, ProductQueryParameters queryParameters)
+        {
+            #region Filtering Criteria
+            if (queryParameters.MinPrice != null)
+            {
+                products = products.Where(p => p.Price >= queryParameters.MinPrice.Value);
+            }
+            if (queryParameters.MaxPrice != null)
+            {
+                products = products.Where(p => p.Price <= queryParameters.MaxPrice.Value);
+            }
+            #endregion
+
+            #region Searching Criteria
+            if (!string.IsNullOrEmpty(queryParameters.ProductName))
+                products = products.Where(p => p.Name.Contains(queryParameters.ProductName, StringComparison.CurrentCultureIgnoreCase));
+            #endregion
+
+            #region Sorting Criteria
+            if(!string.IsNullOrEmpty(queryParameters.SortBy))
+            {
+                if(typeof(Product).GetProperty(queryParameters.SortBy) != null)
+                {
+                    products = products.OrderByCustom(
+                        queryParameters.SortBy,
+                        queryParameters.SortOrder);
+                }
+            }
+            #endregion
+
+            #region Pagination Criteria
+            products = products.Skip(queryParameters.Size * (queryParameters.Page - 1))
+                .Take(queryParameters.Size);
+            #endregion
+
+            return products;
         }
         #endregion
     }
