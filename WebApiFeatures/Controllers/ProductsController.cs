@@ -22,22 +22,44 @@ namespace WebApiFeatures.Controllers
 
         #region HttpGet
         // Pagination Url : https://localhost:7056/api/Products?size=5&page=1
+        // Filtering Url: https://localhost:7056/api/Products?MinPrice=20&MaxPrice=50
         [HttpGet]
-        public ActionResult GetAllProducts([FromQuery] QueryParameters queryParameters)
+        public ActionResult GetAllProducts([FromQuery] ProductQueryParameters queryParameters)
         {
-            IQueryable<Product> products = _context.Products
-               .Skip(queryParameters.Size * (queryParameters.Page - 1))
-               .Take(queryParameters.Size);
+            IQueryable<Product> products = _context.Products;
+
+            if (queryParameters.MinPrice != null)
+            {
+                products = products.Where(p => p.Price >= queryParameters.MinPrice.Value);
+            }
+            if (queryParameters.MaxPrice != null)
+            {
+                products = products.Where(p => p.Price <= queryParameters.MaxPrice.Value);
+            }
+
+            products = products.Skip(queryParameters.Size * (queryParameters.Page - 1))
+                .Take(queryParameters.Size);
 
             return Ok(products.ToList());
         }
 
         // Pagination Url : https://localhost:7056/api/Products/async?size=5&page=1
+        // Filtering Url: https://localhost:7056/api/Products/async/?MinPrice=20&MaxPrice=50
         [HttpGet("async")]
-        public async Task<ActionResult> GetAllProductsAsync([FromQuery] QueryParameters queryParameters)
+        public async Task<ActionResult> GetAllProductsAsync([FromQuery] ProductQueryParameters queryParameters)
         {
-            IQueryable<Product> products = _context.Products
-                .Skip(queryParameters.Size * (queryParameters.Page - 1))
+            IQueryable<Product> products = _context.Products;
+
+            if(queryParameters.MinPrice != null)
+            {
+                products = products.Where(p => p.Price >= queryParameters.MinPrice.Value);
+            }
+            if (queryParameters.MaxPrice != null)
+            {
+                products = products.Where(p => p.Price <= queryParameters.MaxPrice.Value);
+            }
+
+            products = products.Skip(queryParameters.Size * (queryParameters.Page - 1))
                 .Take(queryParameters.Size);
 
             return Ok(await products.ToListAsync());
