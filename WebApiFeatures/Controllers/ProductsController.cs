@@ -3,7 +3,9 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
 using WebApiFeatures.Db;
+using WebApiFeatures.Extensions;
 using WebApiFeatures.Models;
 
 namespace WebApiFeatures.Controllers
@@ -219,6 +221,7 @@ namespace WebApiFeatures.Controllers
         // Pagination Url : https://localhost:7056/api/Products?size=5&page=1
         // Filtering Url: https://localhost:7056/api/Products?MinPrice=20&MaxPrice=50
         // Searching Url: https://localhost:7056/api/Products?ProductName=shirt
+        // Sorting Url: https://localhost:7056/api/Products?SortBy=Price&SortOrder=desc
         private IQueryable<Product> GetSpecificProducts(IQueryable<Product> products, ProductQueryParameters queryParameters)
         {
             #region Filtering Criteria
@@ -235,6 +238,18 @@ namespace WebApiFeatures.Controllers
             #region Searching Criteria
             if (!string.IsNullOrEmpty(queryParameters.ProductName))
                 products = products.Where(p => p.Name.Contains(queryParameters.ProductName, StringComparison.CurrentCultureIgnoreCase));
+            #endregion
+
+            #region Sorting Criteria
+            if(!string.IsNullOrEmpty(queryParameters.SortBy))
+            {
+                if(typeof(Product).GetProperty(queryParameters.SortBy) != null)
+                {
+                    products = products.OrderByCustom(
+                        queryParameters.SortBy,
+                        queryParameters.SortOrder);
+                }
+            }
             #endregion
 
             #region Pagination Criteria
