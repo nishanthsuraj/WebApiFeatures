@@ -21,16 +21,26 @@ namespace WebApiFeatures.Controllers
         }
 
         #region HttpGet
+        // Pagination Url : https://localhost:7056/api/Products?size=5&page=1
         [HttpGet]
-        public ActionResult GetAllProducts()
+        public ActionResult GetAllProducts([FromQuery] QueryParameters queryParameters)
         {
-            return Ok(_context.Products.ToList());
+            IQueryable<Product> products = _context.Products
+               .Skip(queryParameters.Size * (queryParameters.Page - 1))
+               .Take(queryParameters.Size);
+
+            return Ok(products.ToList());
         }
 
+        // Pagination Url : https://localhost:7056/api/Products/async?size=5&page=1
         [HttpGet("async")]
-        public async Task<ActionResult> GetAllProductsAsync()
+        public async Task<ActionResult> GetAllProductsAsync([FromQuery] QueryParameters queryParameters)
         {
-            return Ok(await _context.Products.ToListAsync());
+            IQueryable<Product> products = _context.Products
+                .Skip(queryParameters.Size * (queryParameters.Page - 1))
+                .Take(queryParameters.Size);
+
+            return Ok(await products.ToListAsync());
         }
 
         [HttpGet("{id}")]
