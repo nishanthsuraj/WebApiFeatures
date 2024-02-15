@@ -15,7 +15,11 @@ builder.Services.AddApiVersioning(options =>
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
 
-    options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version");
+    // Implements Header Versioning
+    //options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version"); 
+
+    // Implements Query String Versioning
+    options.ApiVersionReader = new QueryStringApiVersionReader("version"); 
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
