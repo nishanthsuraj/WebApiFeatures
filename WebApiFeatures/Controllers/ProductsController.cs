@@ -1,16 +1,15 @@
 ﻿// Ignore Spelling: Api
 
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection;
 using WebApiFeatures.Db;
 using WebApiFeatures.Extensions;
 using WebApiFeatures.Models;
 
 namespace WebApiFeatures.Controllers
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
+    [Route("api/v{version:apiVersion}/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
     {
