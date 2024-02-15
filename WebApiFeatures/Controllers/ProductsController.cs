@@ -9,8 +9,8 @@ using WebApiFeatures.Models;
 namespace WebApiFeatures.Controllers
 {
     [ApiVersion("1.0")]
-    //[Route("api/v{version:apiVersion}/[controller]")] // api/v1.0/Products
-    [Route("/[controller]")] // /Products?version=1.0
+    [Route("api/v{version:apiVersion}/[controller]")] // api/v1.0/Products
+    //[Route("/[controller]")] // /Products?version=1.0
     [ApiController]
     public class ProductsController : ControllerBase
     {
