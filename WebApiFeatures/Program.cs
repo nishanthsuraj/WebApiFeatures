@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using WebApiFeatures.Db;
 
@@ -13,6 +14,8 @@ builder.Services.AddApiVersioning(options =>
     options.ReportApiVersions = true;
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.AssumeDefaultVersionWhenUnspecified = true;
+
+    options.ApiVersionReader = new HeaderApiVersionReader("X-API-Version");
 });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
