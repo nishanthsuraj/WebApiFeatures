@@ -1,16 +1,35 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using SampleWebApplication.Areas.Identity.Data;
 using SampleWebApplication.Data;
-var builder = WebApplication.CreateBuilder(args);
-var connectionString = builder.Configuration.GetConnectionString("SampleWebApplicationContextConnection") ?? throw new InvalidOperationException("Connection string 'SampleWebApplicationContextConnection' not found.");
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
+var builder = WebApplication.CreateBuilder(args);
+
+var connectionString = builder.Configuration.GetConnectionString("SampleWebApplicationContextConnection") ?? throw new InvalidOperationException("Connection string 'SampleWebApplicationContextConnection' not found.");
 builder.Services.AddDbContext<SampleWebApplicationContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddDefaultIdentity<SampleWebApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SampleWebApplicationContext>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+
+builder.Services.AddAuthorization();
+builder.Services.AddAuthentication()
+    .AddJwtBearer(options =>
+    {
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes("V€r¥ $ecret (not!) V€r¥ $ecret (not!) V€r¥ $ecret (not!)"));
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            IssuerSigningKey = key
+        };
+    });
 
 var app = builder.Build();
 
@@ -26,9 +45,10 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 app.Run();
