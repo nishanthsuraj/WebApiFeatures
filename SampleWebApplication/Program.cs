@@ -1,4 +1,13 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using SampleWebApplication.Areas.Identity.Data;
+using SampleWebApplication.Data;
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("SampleWebApplicationContextConnection") ?? throw new InvalidOperationException("Connection string 'SampleWebApplicationContextConnection' not found.");
+
+builder.Services.AddDbContext<SampleWebApplicationContext>(options => options.UseSqlServer(connectionString));
+
+builder.Services.AddDefaultIdentity<SampleWebApplicationUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<SampleWebApplicationContext>();
 
 // Add services to the container.
 builder.Services.AddRazorPages();
