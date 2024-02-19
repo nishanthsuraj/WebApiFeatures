@@ -1,5 +1,6 @@
 ﻿// Ignore Spelling: Api
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ namespace WebApiFeatures.Controllers
     [Route("api/v{version:apiVersion}/[controller]")] // api/v1.0/Products
     //[Route("/[controller]")] // /Products?version=1.0
     [ApiController]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly ShopContext _context;
