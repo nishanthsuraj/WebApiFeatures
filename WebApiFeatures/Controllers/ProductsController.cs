@@ -1,5 +1,7 @@
 ﻿// Ignore Spelling: Api
 
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApiFeatures.Db;
@@ -9,9 +11,10 @@ using WebApiFeatures.Models;
 namespace WebApiFeatures.Controllers
 {
     [ApiVersion("1.0")]
-    //[Route("api/v{version:apiVersion}/[controller]")] // api/v1.0/Products
-    [Route("/[controller]")] // /Products?version=1.0
+    [Route("api/v{version:apiVersion}/[controller]")] // api/v1.0/Products
+    //[Route("/[controller]")] // /Products?version=1.0
     [ApiController]
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly ShopContext _context;
@@ -24,6 +27,8 @@ namespace WebApiFeatures.Controllers
 
         #region HttpGet
         [HttpGet]
+        //[EnableCors] // Individually enable it for action or can be done for the Controller
+        //[DisableCors] // Individually disable it for action or can be done for the Controller
         public ActionResult GetAllProducts([FromQuery] ProductQueryParameters queryParameters)
         {
             IQueryable<Product> products = GetSpecificProducts(_context.Products, queryParameters);
